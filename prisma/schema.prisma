@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://gizindir_db_owner:npg_viwZjXpFd97g@ep-billowing-salad-a4a4p8f9-pooler.us-east-1.aws.neon.tech/gizindir_db?sslmode=require"
+}
+
+model User {
+  id              Int       @id @default(autoincrement())
+  name            String?   @db.VarChar(100)
+  email           String    @unique @db.VarChar(255)
+  password        String?   @db.VarChar(255)
+  password_hash   String?   @db.VarChar(255)
+  full_name       String?   @db.VarChar(100)
+  gender          String?   @db.VarChar(20)
+  interested_in   String?   @db.VarChar(20)
+  birth_date      DateTime?
+  bio             String?   @db.Text
+  profile_image_url String?  @db.Text
+  created_at      DateTime  @default(now())
+  
+  sentMessages    Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+  
+  sessions        Session[]
+  
+  matchesAsUser1  Match[]   @relation("User1Matches")
+  matchesAsUser2  Match[]   @relation("User2Matches")
+  
+  shownInteractions UserInteraction[] @relation("ShownUserInteractions")
+  userInteractions UserInteraction[] @relation("UserInteractions")
+}
+
+model UserInteraction {
+  id               Int      @id @default(autoincrement())
+  user_email       String   @db.VarChar(255)
+  shown_user_email String   @db.VarChar(255)
+  is_liked         Boolean?
+  created_at       DateTime @default(now())
+  
+  user        User    @relation("UserInteractions", fields: [user_email], references: [email])
+  shown_user  User    @relation("ShownUserInteractions", fields: [shown_user_email], references: [email])
+  
+  @@unique([user_email, shown_user_email])
+}
+
+model Session {
+  id            Int      @id @default(autoincrement())
+  user_id       Int
+  session_token String
+  created_at    DateTime @default(now())
+  
+  user User @relation(fields: [user_id], references: [id])
+}
+
+model Message {
+  id          Int      @id @default(autoincrement())
+  sender_id   Int
+  receiver_id Int
+  content     String   @db.Text
+  sent_at     DateTime @default(now())
+  is_read     Boolean  @default(false)
+  
+  sender    User    @relation("SentMessages", fields: [sender_id], references: [id])
+  receiver  User    @relation("ReceivedMessages", fields: [receiver_id], references: [id])
+}
+
+model Match {
+  id         Int      @id @default(autoincrement())
+  user1_id   Int
+  user2_id   Int
+  matched_at DateTime @default(now())
+  
+  user1 User @relation("User1Matches", fields: [user1_id], references: [id])
+  user2 User @relation("User2Matches", fields: [user2_id], references: [id])
+  
+  @@unique([user1_id, user2_id])
+}

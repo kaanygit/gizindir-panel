@@ -1,0 +1,2 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const databaseUrl="postgresql://gizindir_db_owner:npg_viwZjXpFd97g@ep-billowing-salad-a4a4p8f9-pooler.us-east-1.aws.neon.tech/gizindir_db?sslmode=require";
